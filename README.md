@@ -1,9 +1,14 @@
 
-# Crawler Group Facebook: posts.csv(feed), Reactions.csv, comment.csv, share.csv 
+# Crawler Group Facebook: posts.csv(feed), Reactions.csv, comment.csv
 ## posts.csv
-- p_id
-- p_message
-- p_created_time
+ - p_id
+ - type
+ - p_message
+ - p_created_time
+ - p_updated_time
+ - u_id
+ - u_name
+ - no_share
 ## comments.csv
 - p_id
 - parent_cid
@@ -17,12 +22,6 @@
 - type
 - uid
 - uname
-## shares.csv
-- p_id
-- mgs
-- uid
-- uname
-
  June, 18, 2017
 
 This lib was written by thangdn
