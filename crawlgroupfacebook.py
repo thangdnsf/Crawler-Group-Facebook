@@ -2,24 +2,25 @@
 # Crawler Group Facebook: posts.csv(feed), Reactions.csv, comment.csv, share.csv 
 # posts.csv
 # - p_id
+# - type
 # - p_message
 # - p_created_time
+# - p_updated_time
+# - u_id
+# - u_name
+# - no_share
 # comments.csv
 # - p_id
 # - parent_cid
 # - cid
 # - c_message
 # - c_created_time
-# - uid','uname
+# - uid
+# - uname
 # reactions.csv
 # - p_id
 # - cid
 # - type
-# - uid
-# - uname
-# shares.csv
-# - p_id
-# - mgs
 # - uid
 # - uname
 #
@@ -43,9 +44,6 @@ from multiprocessing import Pool
 group_id = '1098837086877710'
 access_token = 'YOUR TOKEN'
 
-
-graph = facebook.GraphAPI(access_token, version='2.3')
-
 #create post csv
 writerpost = csv.writer(open('posts.csv', 'ab+'), encoding='utf-8')
 writerpost.writerow(['p_id','type','p_message','p_created_time','p_updated_time','u_id','u_name','no_share'])
@@ -61,9 +59,6 @@ writerreaction.writerow(['p_id','cid','type','uid','uname'])
 #set limit:
 plimit=50
 #get posts
-#posts = graph.get_connections(group_id, "feed",limit=plimit)
-#url = '/feed?fields=id,from,message,type,created_time,updated_time,story,shares,comments.limit('+str(plimit)+'){id,message,from,created_time}&limit='+str(plimit)
-
 url = 'https://graph.facebook.com/v2.7/'+group_id+'?fields=feed.limit('+str(plimit)+')%7Bid%2Cfrom%2Cmessage%2Ctype%2Ccreated_time%2Cupdated_time%2Cstory%2Cshares%2Creactions%2Ccomments%7Bid%2Cfrom%2Cmessage%2Creactions%2Ccomments%7Bid%2Cfrom%2Cmessage%2Creactions%2Ccreated_time%7D%2Ccreated_time%7D%7D&access_token='+access_token
 print(url)
 
