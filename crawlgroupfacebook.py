@@ -45,8 +45,8 @@ import facebook
 import unicodecsv as csv
 from multiprocessing import Pool
 
-group_id = '1098837086877710'
-access_token = 'EAACEdEose0cBABZByRcxCzmmlcArtaN2fwJCCsPNTCIQKCHcxJWS99KfKCdY6kgfBYpr67QdZCPiYfhTZBJvwiyJf6Os7fZB0KQhZARIPdZBk7k1Bq78Y4f411AGdilopJUxhfrZCYFal9Wd8weNLWrsOZAr4g8vMBvp3PjHG8MXhXzVwlAZAEWTZBY7JbleDycZCUZD'
+group_id = 'YOUR GROUP ID'
+access_token = 'YOUR ACCESS TOKEN'
 
 #create post csv
 writerpost = csv.writer(open('posts.csv', 'ab+'), encoding='utf-8')
