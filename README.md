@@ -22,7 +22,13 @@
 - type
 - uid
 - uname
- June, 18, 2017
+## tags.csv
+- p_id
+- c_id
+- uid
+- uname
+
+June, 18, 2017
 
 This lib was written by thangdn
 
