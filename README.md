@@ -1,5 +1,5 @@
 
-# Crawler Group Facebook: posts.csv(feed), Reactions.csv, comment.csv
+# Crawler Group Facebook: posts.csv(feed), Reactions.csv, comment.csv and tags.csv
 ## posts.csv
  - p_id
  - type
