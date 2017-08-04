@@ -2,25 +2,29 @@
 # Crawler Group Facebook: posts.csv(feed), Reactions.csv, comment.csv, share.csv 
 # posts.csv
 # - p_id
-# - type
 # - p_message
 # - p_created_time
-# - p_updated_time
-# - u_id
-# - u_name
-# - no_share
 # comments.csv
 # - p_id
 # - parent_cid
 # - cid
 # - c_message
 # - c_created_time
-# - uid
-# - uname
+# - uid','uname
 # reactions.csv
 # - p_id
 # - cid
 # - type
+# - uid
+# - uname
+# shares.csv
+# - p_id
+# - mgs
+# - uid
+# - uname
+# tags.csv
+# - p_id
+# - c_id
 # - uid
 # - uname
 #
@@ -42,7 +46,7 @@ import unicodecsv as csv
 from multiprocessing import Pool
 
 group_id = '1098837086877710'
-access_token = 'YOUR TOKEN'
+access_token = 'EAACEdEose0cBABZByRcxCzmmlcArtaN2fwJCCsPNTCIQKCHcxJWS99KfKCdY6kgfBYpr67QdZCPiYfhTZBJvwiyJf6Os7fZB0KQhZARIPdZBk7k1Bq78Y4f411AGdilopJUxhfrZCYFal9Wd8weNLWrsOZAr4g8vMBvp3PjHG8MXhXzVwlAZAEWTZBY7JbleDycZCUZD'
 
 #create post csv
 writerpost = csv.writer(open('posts.csv', 'ab+'), encoding='utf-8')
@@ -56,10 +60,19 @@ writercomment.writerow(['p_id','parent_cid','cid','c_message','c_created_time','
 writerreaction = csv.writer(open('reactions.csv', 'ab+'), encoding='utf-8')
 writerreaction.writerow(['p_id','cid','type','uid','uname'])
 
+#create tags csv
+writertag = csv.writer(open('tags.csv', 'ab+'), encoding='utf-8')
+writertag.writerow(['p_id','cid','uid','uname'])
+
 #set limit:
 plimit=50
 #get posts
-url = 'https://graph.facebook.com/v2.7/'+group_id+'?fields=feed.limit('+str(plimit)+')%7Bid%2Cfrom%2Cmessage%2Ctype%2Ccreated_time%2Cupdated_time%2Cstory%2Cshares%2Creactions%2Ccomments%7Bid%2Cfrom%2Cmessage%2Creactions%2Ccomments%7Bid%2Cfrom%2Cmessage%2Creactions%2Ccreated_time%7D%2Ccreated_time%7D%7D&access_token='+access_token
+#posts = graph.get_connections(group_id, "feed",limit=plimit)
+#url = '/feed?fields=id,from,message,type,created_time,updated_time,story,shares,comments.limit('+str(plimit)+'){id,message,from,created_time}&limit='+str(plimit)
+
+#url = 'https://graph.facebook.com/v2.7/'+group_id+'?fields=feed.limit('+str(plimit)+')%7Bid%2Cfrom%2Cmessage%2Ctype%2Ccreated_time%2Cupdated_time%2Cstory%2Cshares%2Creactions%2Ccomments%7Bid%2Cfrom%2Cmessage%2Creactions%2Ccomments%7Bid%2Cfrom%2Cmessage%2Creactions%2Ccreated_time%7D%2Ccreated_time%7D%7D&access_token='+access_token
+
+url = 'https://graph.facebook.com/v2.10/1098837086877710?fields=feed%7Bid%2Ctype%2Cmessage%2Cmessage_tags%2Ccreated_time%2Cupdated_time%2Cfrom%2Cstory%2Cshares%2Creactions%2Ccomments%7Bid%2Cfrom%2Cmessage%2Cmessage_tags%2Ccreated_time%2Creactions%7D%7D&access_token='+access_token
 print(url)
 
 posts = requests.get(url).json()['feed']
@@ -81,9 +94,29 @@ def getreaction(p,a):
     except:
         tempreac = []
     return tempreac
+
+def gettag(p,a):
+    temptag = []
+    try:
+        tag = a['message_tags']
+        while (True):
+            if (len(tag) == 0):
+                break
+            for t in tag:
+                temptag.append(
+                    [p['id'], a['id'], t['type'], t['id'], t['name']])
+            try:
+                tag = requests.get(tag['paging']['next']).json()
+            except:
+                break
+    except:
+        temptag = []
+    return temptag
+
 def getreplyComment(p,pc):
     resultcomment=[]
     resultreaction=[]
+    resulttag=[]
     try:
         com = pc['comments']
         while (True):
@@ -93,6 +126,7 @@ def getreplyComment(p,pc):
                 resultcomment.append(
                     [p['id'], pc['id'], c['id'], c['message'], c['created_time'], c['from']['id'], c['from']['name']])
                 resultreaction.extend(getreaction(p,c))
+                resulttag.extend(gettag(p,c))
 
             try:
                 com = requests.get(com['paging']['next']).json()
@@ -100,11 +134,12 @@ def getreplyComment(p,pc):
                 break
     except:
         resultcomment = []
-    return (resultcomment,resultreaction)
+    return (resultcomment,resultreaction,resulttag)
 
 def getcommentPost(p):
     resultcomment=[]
     resultreaction = []
+    resulttag =[]
     try:
         com = p['comments']
         while (True):
@@ -114,6 +149,7 @@ def getcommentPost(p):
                 resultcomment.append(
                     [p['id'], 'x', c['id'], c['message'], c['created_time'], c['from']['id'], c['from']['name']])
                 resultreaction.extend(getreaction(p, c))
+                resulttag.extend(gettag(p,c))
 
                 kq = getreplyComment(p, c)
                 resultcomment.extend(kq[0])
@@ -124,7 +160,7 @@ def getcommentPost(p):
                 break
     except:
         resultcomment = []
-    return (resultcomment,resultreaction)
+    return (resultcomment,resultreaction,resulttag)
 
 def getPost(p):#['p_id','p_message','p_created_time','p_updated_time','u_id','u_name','no_share'])
     msg = ''
@@ -168,7 +204,23 @@ def getPost(p):#['p_id','p_message','p_created_time','p_updated_time','u_id','u_
                 break
     except:
         tempreac = []
-    return ([p['id'],p['type'], msg, p['created_time'], p['updated_time'], uid, uname,noshare],tempreac)
+
+    temptag = []
+    try:
+        tag = p['message_tags']
+        while (True):
+            if (len(tag) == 0):
+                break
+            for t in tag:
+                temptag.append(
+                    [p['id'], 'x', t['type'], t['id'], t['name']])
+            try:
+                tag = requests.get(tag['paging']['next']).json()
+            except:
+                break
+    except:
+        temptag = []
+    return ([p['id'],p['type'], msg, p['created_time'], p['updated_time'], uid, uname,noshare],tempreac,temptag)
 
 
 i = 0
@@ -183,15 +235,19 @@ while(True):
         pool.close()
         pool.join()
 
-        for (p,rs) in resultspost:
+        for (p,rs,ts) in resultspost:
             writerpost.writerow(p)
             for r in rs:
                 writerreaction.writerow(r)
-        for (cs,rs) in kq:
+            for t in ts:
+                writertag.writerow(t)
+        for (cs,rs,ts) in kq:
             for c in cs:
                 writercomment.writerow(c)
             for r in rs:
                 writerreaction.writerow(r)
+            for t in ts:
+                writertag.writerow(t)
 
     try:
         posts = requests.get(posts['paging']['next']).json()
